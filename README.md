@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
 
-First, run the development server:
+# 📝 Better Auth & MongoDB Installation Steps
 
+### Step 1: Install the Package
+Open your terminal and run:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install better-auth
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Step 2: Set Environment Variables
+1. Visit the Better Auth website to generate your auth secret.
+2. Create a `.env` file in your root directory.
+3. Add your base URL and the secret.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+BETTER_AUTH_SECRET=your_generated_code_here
+BETTER_AUTH_URL=http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Step 3: Create A Better Auth Instance
+Create a file at `app/lib/auth.js` (or `.ts`) to initialize the library.
 
-## Learn More
+### Step 4: Install MongoDB Adapter
+Run the following command to install MongoDB support:
+```bash
+npm install @better-auth/mongo-adapter mongodb
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Step 5: Configure `auth.js`
+Paste the following code into your `app/lib/auth.js` file to connect Better Auth with your MongoDB database:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```javascript
+import { betterAuth } from "better-auth";
+import { MongoClient } from "mongodb";
+import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+// Replace with your MongoDB connection string
+const client = new MongoClient("mongodb://localhost:27017/database");
+const db = client.db();
 
-## Deploy on Vercel
+export const auth = betterAuth({
+  database: mongodbAdapter(db, {
+    // Providing the client enables database transactions
+    client 
+  }),
+});
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Step 6: Connect MongoDB Atlas
+Visit [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) to set up your cloud database. Use the connection hook/string in your `.env` or `auth.js` file for production.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Step 7: Authentication Methods
+Configure the methods you want to use. Better Auth supports email/password and social logins out of the box. Update your `auth.ts` / `auth.js` like this:
+
+```javascript
+import { betterAuth } from "better-auth";
+
+export const auth = betterAuth({
+  // ... (previous database config)
+  emailAndPassword: { 
+    enabled: true, 
+  },
+});
+```
+
+---
+
